@@ -26,6 +26,9 @@ WORKDIR /app
 # Salin file aplikasi ke dalam container
 COPY . .
 
+# Salin file .env dari lokal (pastikan file .env ada di direktori yang sama dengan Dockerfile)
+COPY .env .env
+
 # Install dependensi Laravel menggunakan Composer
 RUN composer install --no-dev --optimize-autoloader
 
