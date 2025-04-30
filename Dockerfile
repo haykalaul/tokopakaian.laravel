@@ -1,7 +1,7 @@
-# Gunakan image PHP 8.3 FPM dari Docker Hub
+# Gunakan image resmi PHP dengan FPM
 FROM php:8.3-fpm
 
-# Install dependensi yang diperlukan untuk Laravel
+# Install dependensi sistem untuk Laravel
 RUN apt-get update && apt-get install -y \
     git \
     unzip \
@@ -14,32 +14,20 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libjpeg-dev \
     libfreetype6-dev \
-    libicu-dev \
-    && docker-php-ext-install pdo pdo_mysql zip mbstring iconv
+    libicu-dev && \
+    docker-php-ext-install pdo pdo_mysql zip mbstring iconv
 
-# Install Composer (untuk mengelola dependensi PHP)
+# Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Set work directory di dalam container
+# Set direktori kerja di dalam container
 WORKDIR /app
 
-# Salin file aplikasi ke dalam container
+# Salin semua file proyek Laravel ke dalam container
 COPY . .
 
-# Install dependensi Laravel menggunakan Composer
+# Install dependency Laravel via Composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Pastikan Laravel membaca environment variables dari Railway
-# Tanpa file .env, kita pastikan key di-set dengan cara manual
-RUN php -r "file_put_contents('.env', 'APP_KEY=' . getenv('APP_KEY'));" \
-    && php artisan key:generate
-
-# Cache konfigurasi, route, dan view Laravel
-RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
-
-# Expose port 9000 untuk FPM
-EXPOSE 9000
-
-# Jalankan PHP-FPM untuk Laravel
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=$PORT"]
-
+# Jalankan Laravel menggunakan PHP built-in server dan port dari Railway
+CMD sh -c "php artisan serve --host=0.0.0.0 --port=${PORT}"
