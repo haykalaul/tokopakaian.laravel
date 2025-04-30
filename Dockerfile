@@ -41,4 +41,5 @@ RUN php artisan config:cache && php artisan route:cache && php artisan view:cach
 EXPOSE 9000
 
 # Jalankan PHP-FPM untuk Laravel
-CMD ["php-fpm"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=$PORT"]
+
