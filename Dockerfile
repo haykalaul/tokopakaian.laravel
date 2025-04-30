@@ -26,14 +26,13 @@ WORKDIR /app
 # Salin file aplikasi ke dalam container
 COPY . .
 
-# Salin file .env dari lokal (pastikan file .env ada di direktori yang sama dengan Dockerfile)
-COPY .env .env
-
 # Install dependensi Laravel menggunakan Composer
 RUN composer install --no-dev --optimize-autoloader
 
-# Generate key Laravel
-RUN php artisan key:generate
+# Pastikan Laravel membaca environment variables dari Railway
+# Tanpa file .env, kita pastikan key di-set dengan cara manual
+RUN php -r "file_put_contents('.env', 'APP_KEY=' . getenv('APP_KEY'));" \
+    && php artisan key:generate
 
 # Cache konfigurasi, route, dan view Laravel
 RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
